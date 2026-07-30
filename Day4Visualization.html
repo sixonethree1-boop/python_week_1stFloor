@@ -1,0 +1,649 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Python Caesar Cipher Code Tracer</title>
+  <style>
+    :root {
+      --bg: #0f172a;
+      --panel: #111827;
+      --card: #1f2937;
+      --border: #374151;
+      --text: #f8fafc;
+      --muted: #94a3b8;
+      --accent: #38bdf8;
+      --accent-soft: rgba(56, 189, 248, 0.13);
+      --success: #22c55e;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      font-family: Inter, system-ui, Arial, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+    }
+
+    main {
+      width: min(1180px, calc(100% - 32px));
+      margin: 24px auto 48px;
+    }
+
+    h1 {
+      margin: 0 0 6px;
+      font-size: clamp(1.5rem, 3vw, 2.25rem);
+    }
+
+    .subtitle {
+      margin: 0 0 22px;
+      color: var(--muted);
+    }
+
+    .panel {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 16px;
+    }
+
+    .controls {
+      display: grid;
+      grid-template-columns: 1fr 160px;
+      gap: 14px;
+      margin-bottom: 14px;
+    }
+
+    label {
+      display: block;
+      font-size: 0.9rem;
+      color: var(--muted);
+    }
+
+    input {
+      width: 100%;
+      margin-top: 6px;
+      padding: 11px 12px;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      background: #0b1220;
+      color: var(--text);
+      font-size: 1rem;
+    }
+
+    .buttons {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-bottom: 18px;
+    }
+
+    button {
+      padding: 10px 14px;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      background: var(--card);
+      color: var(--text);
+      cursor: pointer;
+      font-size: 0.95rem;
+    }
+
+    button.primary {
+      background: var(--accent);
+      color: #06202d;
+      border-color: var(--accent);
+      font-weight: 700;
+    }
+
+    button:disabled {
+      opacity: 0.45;
+      cursor: not-allowed;
+    }
+
+    .layout {
+      display: grid;
+      grid-template-columns: 1.15fr 0.85fr;
+      gap: 16px;
+    }
+
+    .code {
+      background: #020617;
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 10px;
+      font-family: Consolas, Monaco, monospace;
+      font-size: 0.94rem;
+    }
+
+    .line {
+      padding: 10px 12px;
+      border-radius: 9px;
+      border: 1px solid transparent;
+      white-space: pre-wrap;
+    }
+
+    .line.active {
+      background: var(--accent-soft);
+      border-color: var(--accent);
+    }
+
+    .line.done {
+      opacity: 0.55;
+    }
+
+    .line-number {
+      display: inline-block;
+      width: 28px;
+      color: #64748b;
+      user-select: none;
+    }
+
+    .indent { padding-left: 34px; }
+
+    .status {
+      display: grid;
+      gap: 12px;
+    }
+
+    .callout {
+      background: var(--accent-soft);
+      border: 1px solid var(--accent);
+      border-radius: 12px;
+      padding: 14px;
+    }
+
+    .callout small,
+    .card small {
+      display: block;
+      color: var(--muted);
+      margin-bottom: 5px;
+    }
+
+    .variables {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 10px;
+    }
+
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 12px;
+      min-height: 84px;
+    }
+
+    .value {
+      font-size: 1.2rem;
+      font-weight: 700;
+      overflow-wrap: anywhere;
+    }
+
+    .wide { grid-column: 1 / -1; }
+
+    .calculation {
+      margin-top: 18px;
+    }
+
+    .calc-grid {
+      display: grid;
+      grid-template-columns: repeat(6, minmax(90px, 1fr));
+      gap: 8px;
+      align-items: stretch;
+    }
+
+    .calc-box {
+      text-align: center;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 12px 8px;
+    }
+
+    .calc-box small {
+      color: var(--muted);
+      display: block;
+      margin-bottom: 7px;
+    }
+
+    .formula {
+      margin-top: 10px;
+      padding: 12px;
+      border-radius: 12px;
+      background: #020617;
+      border: 1px solid var(--border);
+      font-family: Consolas, Monaco, monospace;
+      overflow-wrap: anywhere;
+    }
+
+    .loop-section {
+      margin-top: 18px;
+    }
+
+    .loop-track {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .loop-item {
+      min-width: 92px;
+      text-align: center;
+      padding: 10px;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      background: var(--card);
+    }
+
+    .loop-item.current {
+      border-color: var(--accent);
+      background: var(--accent-soft);
+    }
+
+    .loop-item.done {
+      border-color: var(--success);
+    }
+
+    .terminal {
+      margin-top: 18px;
+      background: #020617;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 14px;
+    }
+
+    .terminal pre {
+      margin: 8px 0 0;
+      white-space: pre-wrap;
+      font-family: Consolas, Monaco, monospace;
+    }
+
+    .hidden { display: none; }
+
+    @media (max-width: 820px) {
+      .layout,
+      .controls {
+        grid-template-columns: 1fr;
+      }
+
+      .calc-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+  </style>
+</head>
+<body>
+<main>
+  <h1>Python Caesar Cipher Code Tracer</h1>
+  <p class="subtitle">Run the program one line at a time and watch every variable change.</p>
+
+  <section class="panel">
+    <div class="controls">
+      <label>
+        Message
+        <input id="messageInput" type="text" value="XYZ" maxlength="12" />
+      </label>
+
+      <label>
+        Shift
+        <input id="shiftInput" type="number" value="3" min="0" max="25" />
+      </label>
+    </div>
+
+    <div class="buttons">
+      <button id="resetButton">Reset</button>
+      <button id="backButton">Previous line</button>
+      <button id="nextButton" class="primary">Run next line</button>
+      <button id="autoButton">Auto run</button>
+    </div>
+
+    <div class="layout">
+      <section class="code" aria-label="Python code">
+        <div class="line" data-line="0"><span class="line-number">1</span>text = input("Enter your message here: ")</div>
+        <div class="line" data-line="1"><span class="line-number">2</span>shift = 3</div>
+        <div class="line" data-line="2"><span class="line-number">3</span>result = ""</div>
+        <div class="line" data-line="3"><span class="line-number">4</span>for char in text:</div>
+        <div class="line indent" data-line="4"><span class="line-number">5</span>base = ord("A")</div>
+        <div class="line indent" data-line="5"><span class="line-number">6</span>result += chr((ord(char) - base + shift) % 26 + base)</div>
+        <div class="line" data-line="6"><span class="line-number">7</span>print(result)</div>
+      </section>
+
+      <section class="status" aria-live="polite">
+        <div class="callout">
+          <small>Now executing</small>
+          <div id="stepTitle" class="value">Program has not started</div>
+          <p id="stepExplanation">Press <strong>Run next line</strong> to execute line 1.</p>
+        </div>
+
+        <div class="variables">
+          <div class="card"><small>text</small><div id="textValue" class="value">not created</div></div>
+          <div class="card"><small>shift</small><div id="shiftValue" class="value">not created</div></div>
+          <div class="card"><small>char</small><div id="charValue" class="value">not created</div></div>
+          <div class="card"><small>base</small><div id="baseValue" class="value">not created</div></div>
+          <div class="card wide"><small>result</small><div id="resultValue" class="value">not created</div></div>
+        </div>
+      </section>
+    </div>
+
+    <section id="calculationSection" class="calculation hidden">
+      <h2>What line 6 does</h2>
+      <div class="calc-grid">
+        <div class="calc-box"><small>ord(char)</small><strong id="ordValue">—</strong></div>
+        <div class="calc-box"><small>− base</small><strong id="positionValue">—</strong></div>
+        <div class="calc-box"><small>+ shift</small><strong id="shiftedValue">—</strong></div>
+        <div class="calc-box"><small>% 26</small><strong id="wrappedValue">—</strong></div>
+        <div class="calc-box"><small>+ base</small><strong id="newCodeValue">—</strong></div>
+        <div class="calc-box"><small>chr()</small><strong id="newCharValue">—</strong></div>
+      </div>
+      <div id="formulaValue" class="formula"></div>
+    </section>
+
+    <section class="loop-section">
+      <h2 id="loopBadge">Loop not started</h2>
+      <div id="loopTrack" class="loop-track"></div>
+    </section>
+
+    <section class="terminal">
+      <small>Terminal</small>
+      <pre id="terminalOutput">No output yet.</pre>
+    </section>
+  </section>
+</main>
+
+<script>
+  const messageInput = document.getElementById("messageInput");
+  const shiftInput = document.getElementById("shiftInput");
+  const codeLines = [...document.querySelectorAll(".line")];
+
+  const stepTitle = document.getElementById("stepTitle");
+  const stepExplanation = document.getElementById("stepExplanation");
+  const textValue = document.getElementById("textValue");
+  const shiftValue = document.getElementById("shiftValue");
+  const charValue = document.getElementById("charValue");
+  const baseValue = document.getElementById("baseValue");
+  const resultValue = document.getElementById("resultValue");
+
+  const calculationSection = document.getElementById("calculationSection");
+  const ordValue = document.getElementById("ordValue");
+  const positionValue = document.getElementById("positionValue");
+  const shiftedValue = document.getElementById("shiftedValue");
+  const wrappedValue = document.getElementById("wrappedValue");
+  const newCodeValue = document.getElementById("newCodeValue");
+  const newCharValue = document.getElementById("newCharValue");
+  const formulaValue = document.getElementById("formulaValue");
+
+  const loopBadge = document.getElementById("loopBadge");
+  const loopTrack = document.getElementById("loopTrack");
+  const terminalOutput = document.getElementById("terminalOutput");
+
+  const nextButton = document.getElementById("nextButton");
+  const backButton = document.getElementById("backButton");
+  const resetButton = document.getElementById("resetButton");
+  const autoButton = document.getElementById("autoButton");
+
+  let snapshots = [];
+  let snapshotIndex = 0;
+  let timer = null;
+
+  function cleanMessage() {
+    return messageInput.value.toUpperCase().replace(/[^A-Z]/g, "");
+  }
+
+  function buildSnapshots() {
+    const text = cleanMessage() || "A";
+    const shift = Math.max(0, Math.min(25, Number(shiftInput.value) || 0));
+    const states = [];
+    let result = "";
+
+    states.push({
+      activeLine: -1,
+      title: "Program has not started",
+      explanation: "Press Run next line to execute line 1.",
+      variables: {}
+    });
+
+    states.push({
+      activeLine: 0,
+      title: "Line 1 stores the input",
+      explanation: `The user enters "${text}". Python stores it inside the variable text.`,
+      variables: { text }
+    });
+
+    states.push({
+      activeLine: 1,
+      title: "Line 2 stores the shift",
+      explanation: `shift becomes ${shift}. Each letter will move ${shift} position${shift === 1 ? "" : "s"}.`,
+      variables: { text, shift }
+    });
+
+    states.push({
+      activeLine: 2,
+      title: "Line 3 creates an empty result",
+      explanation: "result starts empty. New encrypted letters will be added one by one.",
+      variables: { text, shift, result: "" }
+    });
+
+    [...text].forEach((char, loopIndex) => {
+      states.push({
+        activeLine: 3,
+        title: `Line 4 starts iteration ${loopIndex + 1}`,
+        explanation: `Python takes character ${loopIndex + 1} from text. char becomes "${char}".`,
+        variables: { text, shift, result, char },
+        loopIndex,
+        phase: "loop"
+      });
+
+      const base = 65;
+
+      states.push({
+        activeLine: 4,
+        title: "Line 5 creates base",
+        explanation: `ord("A") is 65, so base becomes 65.`,
+        variables: { text, shift, result, char, base },
+        loopIndex,
+        phase: "base"
+      });
+
+      const code = char.charCodeAt(0);
+      const position = code - base;
+      const shifted = position + shift;
+      const wrapped = shifted % 26;
+      const newCode = wrapped + base;
+      const newChar = String.fromCharCode(newCode);
+      const oldResult = result;
+      result += newChar;
+
+      states.push({
+        activeLine: 5,
+        title: `Line 6 changes ${char} into ${newChar}`,
+        explanation: `The formula creates "${newChar}". Then += adds it to "${oldResult}", so result becomes "${result}".`,
+        variables: { text, shift, result, char, base },
+        loopIndex,
+        phase: "calculation",
+        calculation: { code, position, shifted, wrapped, newCode, newChar }
+      });
+    });
+
+    states.push({
+      activeLine: 3,
+      title: "The loop is finished",
+      explanation: `All ${text.length} characters have been processed.`,
+      variables: { text, shift, result },
+      loopIndex: text.length,
+      phase: "finished"
+    });
+
+    states.push({
+      activeLine: 6,
+      title: "Line 7 prints the result",
+      explanation: `print(result) displays "${result}" in the terminal.`,
+      variables: { text, shift, result },
+      loopIndex: text.length,
+      phase: "print",
+      output: result
+    });
+
+    return states;
+  }
+
+  function display(element, value, quoted = false) {
+    if (value === undefined) {
+      element.textContent = "not created";
+      return;
+    }
+    element.textContent = quoted ? `"${value}"` : value;
+  }
+
+  function renderLoop(state) {
+    const text = state.variables.text || cleanMessage() || "A";
+    const current = state.loopIndex;
+
+    loopTrack.innerHTML = "";
+
+    [...text].forEach((letter, index) => {
+      const box = document.createElement("div");
+      box.className = "loop-item";
+
+      if (typeof current === "number" && index === current && !["finished", "print"].includes(state.phase)) {
+        box.classList.add("current");
+      }
+
+      if (
+        (typeof current === "number" && index < current) ||
+        ["finished", "print"].includes(state.phase)
+      ) {
+        box.classList.add("done");
+      }
+
+      const shift = Number(state.variables.shift || 0);
+      const encrypted = String.fromCharCode(((letter.charCodeAt(0) - 65 + shift) % 26) + 65);
+
+      box.innerHTML = `
+        <small>Character ${index + 1}</small>
+        <div class="value">${letter}</div>
+        <div>${box.classList.contains("done") ? `Result: ${encrypted}` : box.classList.contains("current") ? "Current" : "Waiting"}</div>
+      `;
+
+      loopTrack.appendChild(box);
+    });
+
+    if (["finished", "print"].includes(state.phase)) {
+      loopBadge.textContent = "All characters processed";
+    } else if (typeof current === "number") {
+      loopBadge.textContent = `Loop iteration ${current + 1} of ${text.length}`;
+    } else {
+      loopBadge.textContent = "Loop not started";
+    }
+  }
+
+  function render() {
+    const state = snapshots[snapshotIndex];
+
+    codeLines.forEach((line, index) => {
+      line.classList.remove("active", "done");
+
+      if (index === state.activeLine) {
+        line.classList.add("active");
+      }
+
+      if (state.activeLine >= 0 && index < state.activeLine && state.phase !== "loop") {
+        line.classList.add("done");
+      }
+    });
+
+    stepTitle.textContent = state.title;
+    stepExplanation.textContent = state.explanation;
+
+    display(textValue, state.variables.text, true);
+    display(shiftValue, state.variables.shift);
+    display(charValue, state.variables.char, true);
+    display(baseValue, state.variables.base);
+    display(resultValue, state.variables.result, true);
+
+    if (state.calculation) {
+      calculationSection.classList.remove("hidden");
+
+      const c = state.calculation;
+      ordValue.textContent = c.code;
+      positionValue.textContent = c.position;
+      shiftedValue.textContent = c.shifted;
+      wrappedValue.textContent = c.wrapped;
+      newCodeValue.textContent = c.newCode;
+      newCharValue.textContent = c.newChar;
+
+      formulaValue.textContent =
+        `chr((${c.code} - ${state.variables.base} + ${state.variables.shift}) % 26 + ${state.variables.base}) = chr(${c.newCode}) = "${c.newChar}"`;
+    } else {
+      calculationSection.classList.add("hidden");
+    }
+
+    renderLoop(state);
+    terminalOutput.textContent = state.output !== undefined ? state.output : "No output yet.";
+
+    backButton.disabled = snapshotIndex === 0;
+    nextButton.disabled = snapshotIndex === snapshots.length - 1;
+    nextButton.textContent = snapshotIndex === snapshots.length - 1 ? "Program complete" : "Run next line";
+  }
+
+  function stopAuto() {
+    if (timer) {
+      clearInterval(timer);
+      timer = null;
+      autoButton.textContent = "Auto run";
+    }
+  }
+
+  function rebuild() {
+    stopAuto();
+    snapshots = buildSnapshots();
+    snapshotIndex = 0;
+    render();
+  }
+
+  nextButton.addEventListener("click", () => {
+    if (snapshotIndex < snapshots.length - 1) {
+      snapshotIndex++;
+      render();
+    }
+  });
+
+  backButton.addEventListener("click", () => {
+    if (snapshotIndex > 0) {
+      snapshotIndex--;
+      render();
+    }
+  });
+
+  resetButton.addEventListener("click", rebuild);
+  messageInput.addEventListener("input", rebuild);
+  shiftInput.addEventListener("input", rebuild);
+
+  autoButton.addEventListener("click", () => {
+    if (timer) {
+      stopAuto();
+      return;
+    }
+
+    if (snapshotIndex === snapshots.length - 1) {
+      snapshotIndex = 0;
+    }
+
+    autoButton.textContent = "Pause";
+
+    timer = setInterval(() => {
+      if (snapshotIndex >= snapshots.length - 1) {
+        stopAuto();
+        return;
+      }
+
+      snapshotIndex++;
+      render();
+    }, 1200);
+  });
+
+  snapshots = buildSnapshots();
+  render();
+</script>
+</body>
+</html>
