@@ -71,11 +71,11 @@
 # letter into uppercase
 
 
-text = input("Enter word here: ")
-result = ""
-for letter in text:
-    result = result + letter.upper()
-print(result) 
+# text = input("Enter word here: ")
+# result = ""
+# for letter in text:
+#     result = result + letter.upper()
+# print(result) 
 
 
 
@@ -95,3 +95,8 @@ print(result)
 #READING ASSIGNMENT- SEARCH ABOUT ASCII
 
 
+word = input("Enter a word: ")
+result = ""
+for letter in word:
+    result = letter + result + letter
+print("Reversed word:", result)
