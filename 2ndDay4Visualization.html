@@ -1,0 +1,884 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Python Encrypt Function Tracer</title>
+  <style>
+    :root {
+      --bg: #0f172a;
+      --panel: #111827;
+      --card: #1f2937;
+      --border: #374151;
+      --text: #f8fafc;
+      --muted: #94a3b8;
+      --accent: #38bdf8;
+      --accent-soft: rgba(56, 189, 248, 0.13);
+      --success: #22c55e;
+      --warning: #f59e0b;
+      --danger: #ef4444;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      font-family: Inter, system-ui, Arial, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+    }
+
+    main {
+      width: min(1200px, calc(100% - 32px));
+      margin: 24px auto 48px;
+    }
+
+    h1 {
+      margin: 0 0 6px;
+      font-size: clamp(1.5rem, 3vw, 2.25rem);
+    }
+
+    h2 {
+      margin: 0 0 12px;
+      font-size: 1.15rem;
+    }
+
+    .subtitle {
+      margin: 0 0 22px;
+      color: var(--muted);
+    }
+
+    .panel {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 16px;
+    }
+
+    .controls {
+      display: grid;
+      grid-template-columns: 1fr 160px;
+      gap: 14px;
+      margin-bottom: 14px;
+    }
+
+    label {
+      display: block;
+      font-size: 0.9rem;
+      color: var(--muted);
+    }
+
+    input {
+      width: 100%;
+      margin-top: 6px;
+      padding: 11px 12px;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      background: #0b1220;
+      color: var(--text);
+      font-size: 1rem;
+    }
+
+    .buttons {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-bottom: 18px;
+    }
+
+    button {
+      padding: 10px 14px;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      background: var(--card);
+      color: var(--text);
+      cursor: pointer;
+      font-size: 0.95rem;
+    }
+
+    button.primary {
+      background: var(--accent);
+      color: #06202d;
+      border-color: var(--accent);
+      font-weight: 700;
+    }
+
+    button:disabled {
+      opacity: 0.45;
+      cursor: not-allowed;
+    }
+
+    .layout {
+      display: grid;
+      grid-template-columns: 1.15fr 0.85fr;
+      gap: 16px;
+    }
+
+    .code {
+      background: #020617;
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 10px;
+      font-family: Consolas, Monaco, monospace;
+      font-size: 0.9rem;
+    }
+
+    .line {
+      padding: 8px 10px;
+      border-radius: 9px;
+      border: 1px solid transparent;
+      white-space: pre-wrap;
+    }
+
+    .line.active {
+      background: var(--accent-soft);
+      border-color: var(--accent);
+    }
+
+    .line.done {
+      opacity: 0.55;
+    }
+
+    .line-number {
+      display: inline-block;
+      width: 30px;
+      color: #64748b;
+      user-select: none;
+    }
+
+    .indent-1 { padding-left: 34px; }
+    .indent-2 { padding-left: 68px; }
+    .indent-3 { padding-left: 102px; }
+
+    .status {
+      display: grid;
+      gap: 12px;
+    }
+
+    .callout {
+      background: var(--accent-soft);
+      border: 1px solid var(--accent);
+      border-radius: 12px;
+      padding: 14px;
+    }
+
+    .callout small,
+    .card small {
+      display: block;
+      color: var(--muted);
+      margin-bottom: 5px;
+    }
+
+    .variables {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 10px;
+    }
+
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 12px;
+      min-height: 84px;
+    }
+
+    .value {
+      font-size: 1.15rem;
+      font-weight: 700;
+      overflow-wrap: anywhere;
+    }
+
+    .wide { grid-column: 1 / -1; }
+
+    .decision-section,
+    .calculation,
+    .loop-section,
+    .return-section {
+      margin-top: 18px;
+    }
+
+    .decision-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+    }
+
+    .decision-box {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 12px;
+      text-align: center;
+    }
+
+    .decision-box.active {
+      border-color: var(--accent);
+      background: var(--accent-soft);
+    }
+
+    .decision-box.true {
+      border-color: var(--success);
+    }
+
+    .decision-box.false {
+      border-color: var(--warning);
+    }
+
+    .decision-answer {
+      margin-top: 7px;
+      font-weight: 700;
+    }
+
+    .calc-grid {
+      display: grid;
+      grid-template-columns: repeat(6, minmax(90px, 1fr));
+      gap: 8px;
+      align-items: stretch;
+    }
+
+    .calc-box {
+      text-align: center;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 12px 8px;
+    }
+
+    .calc-box small {
+      color: var(--muted);
+      display: block;
+      margin-bottom: 7px;
+    }
+
+    .formula {
+      margin-top: 10px;
+      padding: 12px;
+      border-radius: 12px;
+      background: #020617;
+      border: 1px solid var(--border);
+      font-family: Consolas, Monaco, monospace;
+      overflow-wrap: anywhere;
+    }
+
+    .loop-track {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .loop-item {
+      min-width: 104px;
+      text-align: center;
+      padding: 10px;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      background: var(--card);
+    }
+
+    .loop-item.current {
+      border-color: var(--accent);
+      background: var(--accent-soft);
+    }
+
+    .loop-item.done {
+      border-color: var(--success);
+    }
+
+    .terminal {
+      margin-top: 18px;
+      background: #020617;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 14px;
+    }
+
+    .terminal pre {
+      margin: 8px 0 0;
+      white-space: pre-wrap;
+      font-family: Consolas, Monaco, monospace;
+    }
+
+    .return-box {
+      padding: 14px;
+      border-radius: 12px;
+      border: 1px solid var(--success);
+      background: rgba(34, 197, 94, 0.1);
+    }
+
+    .hidden { display: none; }
+
+    @media (max-width: 900px) {
+      .layout,
+      .controls {
+        grid-template-columns: 1fr;
+      }
+
+      .calc-grid,
+      .decision-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+
+    @media (max-width: 560px) {
+      .calc-grid,
+      .decision-grid,
+      .variables {
+        grid-template-columns: 1fr;
+      }
+
+      .wide { grid-column: auto; }
+    }
+  </style>
+</head>
+<body>
+<main>
+  <h1>Python Encrypt Function Tracer</h1>
+  <p class="subtitle">Follow the function line by line and watch Python decide what to do with every character.</p>
+
+  <section class="panel">
+    <div class="controls">
+      <label>
+        Message
+        <input id="messageInput" type="text" value="Hello, IWU!" maxlength="20" />
+      </label>
+
+      <label>
+        Shift
+        <input id="shiftInput" type="number" value="3" min="0" max="25" />
+      </label>
+    </div>
+
+    <div class="buttons">
+      <button id="resetButton">Reset</button>
+      <button id="backButton">Previous line</button>
+      <button id="nextButton" class="primary">Run next line</button>
+      <button id="autoButton">Auto run</button>
+    </div>
+
+    <div class="layout">
+      <section class="code" aria-label="Python code">
+        <div class="line" data-line="0"><span class="line-number">1</span>def encrypt(text, shift):</div>
+        <div class="line indent-1" data-line="1"><span class="line-number">2</span>result = ""</div>
+        <div class="line indent-1" data-line="2"><span class="line-number">3</span>for char in text:</div>
+        <div class="line indent-2" data-line="3"><span class="line-number">4</span>if char.isalpha():</div>
+        <div class="line indent-3" data-line="4"><span class="line-number">5</span>if char.isupper():</div>
+        <div class="line indent-3" data-line="5"><span class="line-number">6</span>    base = ord("A")</div>
+        <div class="line indent-3" data-line="6"><span class="line-number">7</span>else:</div>
+        <div class="line indent-3" data-line="7"><span class="line-number">8</span>    base = ord("a")</div>
+        <div class="line indent-3" data-line="8"><span class="line-number">9</span>result += chr((ord(char) - base + shift) % 26 + base)</div>
+        <div class="line indent-2" data-line="9"><span class="line-number">10</span>else:</div>
+        <div class="line indent-3" data-line="10"><span class="line-number">11</span>result += char</div>
+        <div class="line indent-1" data-line="11"><span class="line-number">12</span>return result</div>
+      </section>
+
+      <section class="status" aria-live="polite">
+        <div class="callout">
+          <small>Now executing</small>
+          <div id="stepTitle" class="value">Function has not started</div>
+          <p id="stepExplanation">Press <strong>Run next line</strong> to begin.</p>
+        </div>
+
+        <div class="variables">
+          <div class="card"><small>text</small><div id="textValue" class="value">not created</div></div>
+          <div class="card"><small>shift</small><div id="shiftValue" class="value">not created</div></div>
+          <div class="card"><small>char</small><div id="charValue" class="value">not created</div></div>
+          <div class="card"><small>base</small><div id="baseValue" class="value">not created</div></div>
+          <div class="card wide"><small>result</small><div id="resultValue" class="value">not created</div></div>
+        </div>
+      </section>
+    </div>
+
+    <section class="decision-section">
+      <h2>Decision Path</h2>
+      <div class="decision-grid">
+        <div id="alphaDecision" class="decision-box">
+          <small>Is it a letter?</small>
+          <div><code>char.isalpha()</code></div>
+          <div id="alphaAnswer" class="decision-answer">Waiting</div>
+        </div>
+
+        <div id="upperDecision" class="decision-box">
+          <small>Is it uppercase?</small>
+          <div><code>char.isupper()</code></div>
+          <div id="upperAnswer" class="decision-answer">Waiting</div>
+        </div>
+
+        <div id="actionDecision" class="decision-box">
+          <small>Python's action</small>
+          <div id="actionAnswer" class="decision-answer">Waiting</div>
+        </div>
+      </div>
+    </section>
+
+    <section id="calculationSection" class="calculation hidden">
+      <h2>Caesar Cipher Calculation</h2>
+      <div class="calc-grid">
+        <div class="calc-box"><small>ord(char)</small><strong id="ordValue">—</strong></div>
+        <div class="calc-box"><small>− base</small><strong id="positionValue">—</strong></div>
+        <div class="calc-box"><small>+ shift</small><strong id="shiftedValue">—</strong></div>
+        <div class="calc-box"><small>% 26</small><strong id="wrappedValue">—</strong></div>
+        <div class="calc-box"><small>+ base</small><strong id="newCodeValue">—</strong></div>
+        <div class="calc-box"><small>chr()</small><strong id="newCharValue">—</strong></div>
+      </div>
+      <div id="formulaValue" class="formula"></div>
+    </section>
+
+    <section class="loop-section">
+      <h2 id="loopBadge">Loop not started</h2>
+      <div id="loopTrack" class="loop-track"></div>
+    </section>
+
+    <section id="returnSection" class="return-section hidden">
+      <div class="return-box">
+        <small>Returned value</small>
+        <div id="returnValue" class="value"></div>
+      </div>
+    </section>
+
+    <section class="terminal">
+      <small>Caller receives</small>
+      <pre id="terminalOutput">No returned value yet.</pre>
+    </section>
+  </section>
+</main>
+
+<script>
+  const messageInput = document.getElementById("messageInput");
+  const shiftInput = document.getElementById("shiftInput");
+  const codeLines = [...document.querySelectorAll(".line")];
+
+  const stepTitle = document.getElementById("stepTitle");
+  const stepExplanation = document.getElementById("stepExplanation");
+  const textValue = document.getElementById("textValue");
+  const shiftValue = document.getElementById("shiftValue");
+  const charValue = document.getElementById("charValue");
+  const baseValue = document.getElementById("baseValue");
+  const resultValue = document.getElementById("resultValue");
+
+  const alphaDecision = document.getElementById("alphaDecision");
+  const upperDecision = document.getElementById("upperDecision");
+  const actionDecision = document.getElementById("actionDecision");
+  const alphaAnswer = document.getElementById("alphaAnswer");
+  const upperAnswer = document.getElementById("upperAnswer");
+  const actionAnswer = document.getElementById("actionAnswer");
+
+  const calculationSection = document.getElementById("calculationSection");
+  const ordValue = document.getElementById("ordValue");
+  const positionValue = document.getElementById("positionValue");
+  const shiftedValue = document.getElementById("shiftedValue");
+  const wrappedValue = document.getElementById("wrappedValue");
+  const newCodeValue = document.getElementById("newCodeValue");
+  const newCharValue = document.getElementById("newCharValue");
+  const formulaValue = document.getElementById("formulaValue");
+
+  const loopBadge = document.getElementById("loopBadge");
+  const loopTrack = document.getElementById("loopTrack");
+  const returnSection = document.getElementById("returnSection");
+  const returnValue = document.getElementById("returnValue");
+  const terminalOutput = document.getElementById("terminalOutput");
+
+  const nextButton = document.getElementById("nextButton");
+  const backButton = document.getElementById("backButton");
+  const resetButton = document.getElementById("resetButton");
+  const autoButton = document.getElementById("autoButton");
+
+  let snapshots = [];
+  let snapshotIndex = 0;
+  let timer = null;
+
+  function getMessage() {
+    return messageInput.value || "A";
+  }
+
+  function getShift() {
+    return Math.max(0, Math.min(25, Number(shiftInput.value) || 0));
+  }
+
+  function encryptCharacter(char, shift) {
+    if (!/[A-Za-z]/.test(char)) {
+      return char;
+    }
+
+    const base = /[A-Z]/.test(char) ? 65 : 97;
+    return String.fromCharCode((char.charCodeAt(0) - base + shift) % 26 + base);
+  }
+
+  function buildSnapshots() {
+    const text = getMessage();
+    const shift = getShift();
+    const states = [];
+    let result = "";
+
+    states.push({
+      activeLine: -1,
+      title: "Function has not started",
+      explanation: "Press Run next line to begin.",
+      variables: {}
+    });
+
+    states.push({
+      activeLine: 0,
+      title: "Line 1 defines the function",
+      explanation: `Python creates a function named encrypt. When called, text receives "${text}" and shift receives ${shift}.`,
+      variables: { text, shift },
+      phase: "definition"
+    });
+
+    states.push({
+      activeLine: 1,
+      title: "Line 2 creates an empty result",
+      explanation: "result starts as an empty string. Each processed character will be added here.",
+      variables: { text, shift, result: "" },
+      phase: "result"
+    });
+
+    [...text].forEach((char, loopIndex) => {
+      const isAlpha = /[A-Za-z]/.test(char);
+      const isUpper = /[A-Z]/.test(char);
+
+      states.push({
+        activeLine: 2,
+        title: `Line 3 starts iteration ${loopIndex + 1}`,
+        explanation: `Python takes character ${loopIndex + 1} from text. char becomes "${char}".`,
+        variables: { text, shift, result, char },
+        loopIndex,
+        phase: "loop"
+      });
+
+      states.push({
+        activeLine: 3,
+        title: `Line 4 checks whether "${char}" is a letter`,
+        explanation: isAlpha
+          ? `"${char}".isalpha() is True, so Python enters the letter branch.`
+          : `"${char}".isalpha() is False, so Python skips encryption and goes to the else branch.`,
+        variables: { text, shift, result, char },
+        loopIndex,
+        phase: "alpha",
+        decisions: { alpha: isAlpha }
+      });
+
+      if (isAlpha) {
+        states.push({
+          activeLine: 4,
+          title: `Line 5 checks whether "${char}" is uppercase`,
+          explanation: isUpper
+            ? `"${char}".isupper() is True, so Python will use uppercase A as the base.`
+            : `"${char}".isupper() is False, so Python will use lowercase a as the base.`,
+          variables: { text, shift, result, char },
+          loopIndex,
+          phase: "upper",
+          decisions: { alpha: true, upper: isUpper }
+        });
+
+        const base = isUpper ? 65 : 97;
+        const baseLine = isUpper ? 5 : 7;
+
+        states.push({
+          activeLine: baseLine,
+          title: isUpper ? 'Line 6 sets base to ord("A")' : 'Line 8 sets base to ord("a")',
+          explanation: isUpper
+            ? 'ord("A") is 65, so base becomes 65.'
+            : 'ord("a") is 97, so base becomes 97.',
+          variables: { text, shift, result, char, base },
+          loopIndex,
+          phase: "base",
+          decisions: { alpha: true, upper: isUpper },
+          action: isUpper ? "Use uppercase base 65" : "Use lowercase base 97"
+        });
+
+        const code = char.charCodeAt(0);
+        const position = code - base;
+        const shifted = position + shift;
+        const wrapped = shifted % 26;
+        const newCode = wrapped + base;
+        const newChar = String.fromCharCode(newCode);
+        const oldResult = result;
+        result += newChar;
+
+        states.push({
+          activeLine: 8,
+          title: `Line 9 changes "${char}" into "${newChar}"`,
+          explanation: `The formula creates "${newChar}". Then += adds it to "${oldResult}", making result "${result}".`,
+          variables: { text, shift, result, char, base },
+          loopIndex,
+          phase: "calculation",
+          decisions: { alpha: true, upper: isUpper },
+          action: `Encrypt ${char} → ${newChar}`,
+          calculation: { code, position, shifted, wrapped, newCode, newChar }
+        });
+      } else {
+        states.push({
+          activeLine: 9,
+          title: "Line 10 selects the non-letter branch",
+          explanation: `"${char}" is not a letter, so Python enters the else block.`,
+          variables: { text, shift, result, char },
+          loopIndex,
+          phase: "nonletter-else",
+          decisions: { alpha: false },
+          action: "Keep character unchanged"
+        });
+
+        const oldResult = result;
+        result += char;
+
+        states.push({
+          activeLine: 10,
+          title: `Line 11 keeps "${char}" unchanged`,
+          explanation: `Python adds "${char}" directly to "${oldResult}", making result "${result}".`,
+          variables: { text, shift, result, char },
+          loopIndex,
+          phase: "preserve",
+          decisions: { alpha: false },
+          action: `Copy ${char} unchanged`
+        });
+      }
+    });
+
+    states.push({
+      activeLine: 2,
+      title: "The loop is finished",
+      explanation: `All ${text.length} characters have been processed.`,
+      variables: { text, shift, result },
+      loopIndex: text.length,
+      phase: "finished"
+    });
+
+    states.push({
+      activeLine: 11,
+      title: "Line 12 returns the final result",
+      explanation: `The function sends "${result}" back to the code that called encrypt().`,
+      variables: { text, shift, result },
+      loopIndex: text.length,
+      phase: "return",
+      output: result
+    });
+
+    return states;
+  }
+
+  function display(element, value, quoted = false) {
+    if (value === undefined) {
+      element.textContent = "not created";
+      return;
+    }
+
+    element.textContent = quoted ? `"${value}"` : value;
+  }
+
+  function resetDecisionBoxes() {
+    [alphaDecision, upperDecision, actionDecision].forEach(box => {
+      box.classList.remove("active", "true", "false");
+    });
+
+    alphaAnswer.textContent = "Waiting";
+    upperAnswer.textContent = "Waiting";
+    actionAnswer.textContent = "Waiting";
+  }
+
+  function renderDecisions(state) {
+    resetDecisionBoxes();
+
+    if (!state.decisions && !state.action) return;
+
+    if (state.decisions && state.decisions.alpha !== undefined) {
+      alphaDecision.classList.add(state.decisions.alpha ? "true" : "false");
+      alphaAnswer.textContent = state.decisions.alpha ? "True ✓" : "False ✗";
+    }
+
+    if (state.phase === "alpha") {
+      alphaDecision.classList.add("active");
+    }
+
+    if (state.decisions && state.decisions.upper !== undefined) {
+      upperDecision.classList.add(state.decisions.upper ? "true" : "false");
+      upperAnswer.textContent = state.decisions.upper ? "True ✓" : "False ✗";
+    } else if (state.decisions && state.decisions.alpha === false) {
+      upperAnswer.textContent = "Skipped";
+    }
+
+    if (state.phase === "upper") {
+      upperDecision.classList.add("active");
+    }
+
+    if (state.action) {
+      actionAnswer.textContent = state.action;
+      actionDecision.classList.add("active");
+    }
+  }
+
+  function renderLoop(state) {
+    const text = state.variables.text || getMessage();
+    const current = state.loopIndex;
+
+    loopTrack.innerHTML = "";
+
+    [...text].forEach((character, index) => {
+      const box = document.createElement("div");
+      box.className = "loop-item";
+
+      if (
+        typeof current === "number" &&
+        index === current &&
+        !["finished", "return"].includes(state.phase)
+      ) {
+        box.classList.add("current");
+      }
+
+      if (
+        (typeof current === "number" && index < current) ||
+        ["finished", "return"].includes(state.phase)
+      ) {
+        box.classList.add("done");
+      }
+
+      const encrypted = encryptCharacter(character, Number(state.variables.shift || 0));
+      const shown = character === " " ? "space" : character;
+
+      box.innerHTML = `
+        <small>Character ${index + 1}</small>
+        <div class="value">${shown}</div>
+        <div>${
+          box.classList.contains("done")
+            ? `Result: ${encrypted === " " ? "space" : encrypted}`
+            : box.classList.contains("current")
+              ? "Current"
+              : "Waiting"
+        }</div>
+      `;
+
+      loopTrack.appendChild(box);
+    });
+
+    if (["finished", "return"].includes(state.phase)) {
+      loopBadge.textContent = "All characters processed";
+    } else if (typeof current === "number") {
+      loopBadge.textContent = `Loop iteration ${current + 1} of ${text.length}`;
+    } else {
+      loopBadge.textContent = "Loop not started";
+    }
+  }
+
+  function render() {
+    const state = snapshots[snapshotIndex];
+
+    codeLines.forEach((line, index) => {
+      line.classList.remove("active", "done");
+
+      if (index === state.activeLine) {
+        line.classList.add("active");
+      }
+
+      if (state.activeLine >= 0 && index < state.activeLine && state.phase !== "loop") {
+        line.classList.add("done");
+      }
+    });
+
+    stepTitle.textContent = state.title;
+    stepExplanation.textContent = state.explanation;
+
+    display(textValue, state.variables.text, true);
+    display(shiftValue, state.variables.shift);
+    display(charValue, state.variables.char, true);
+    display(baseValue, state.variables.base);
+    display(resultValue, state.variables.result, true);
+
+    renderDecisions(state);
+
+    if (state.calculation) {
+      calculationSection.classList.remove("hidden");
+
+      const c = state.calculation;
+      ordValue.textContent = c.code;
+      positionValue.textContent = c.position;
+      shiftedValue.textContent = c.shifted;
+      wrappedValue.textContent = c.wrapped;
+      newCodeValue.textContent = c.newCode;
+      newCharValue.textContent = c.newChar;
+
+      formulaValue.textContent =
+        `chr((${c.code} - ${state.variables.base} + ${state.variables.shift}) % 26 + ${state.variables.base}) = chr(${c.newCode}) = "${c.newChar}"`;
+    } else {
+      calculationSection.classList.add("hidden");
+    }
+
+    renderLoop(state);
+
+    if (state.phase === "return") {
+      returnSection.classList.remove("hidden");
+      returnValue.textContent = `"${state.output}"`;
+      terminalOutput.textContent = state.output;
+    } else {
+      returnSection.classList.add("hidden");
+      terminalOutput.textContent = "No returned value yet.";
+    }
+
+    backButton.disabled = snapshotIndex === 0;
+    nextButton.disabled = snapshotIndex === snapshots.length - 1;
+    nextButton.textContent =
+      snapshotIndex === snapshots.length - 1
+        ? "Function complete"
+        : "Run next line";
+  }
+
+  function stopAuto() {
+    if (timer) {
+      clearInterval(timer);
+      timer = null;
+      autoButton.textContent = "Auto run";
+    }
+  }
+
+  function rebuild() {
+    stopAuto();
+    snapshots = buildSnapshots();
+    snapshotIndex = 0;
+    render();
+  }
+
+  nextButton.addEventListener("click", () => {
+    if (snapshotIndex < snapshots.length - 1) {
+      snapshotIndex++;
+      render();
+    }
+  });
+
+  backButton.addEventListener("click", () => {
+    if (snapshotIndex > 0) {
+      snapshotIndex--;
+      render();
+    }
+  });
+
+  resetButton.addEventListener("click", rebuild);
+  messageInput.addEventListener("input", rebuild);
+  shiftInput.addEventListener("input", rebuild);
+
+  autoButton.addEventListener("click", () => {
+    if (timer) {
+      stopAuto();
+      return;
+    }
+
+    if (snapshotIndex === snapshots.length - 1) {
+      snapshotIndex = 0;
+    }
+
+    autoButton.textContent = "Pause";
+
+    timer = setInterval(() => {
+      if (snapshotIndex >= snapshots.length - 1) {
+        stopAuto();
+        return;
+      }
+
+      snapshotIndex++;
+      render();
+    }, 1200);
+  });
+
+  snapshots = buildSnapshots();
+  render();
+</script>
+</body>
+</html>
